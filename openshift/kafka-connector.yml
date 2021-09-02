@@ -1,0 +1,20 @@
+  apiVersion: kafka.strimzi.io/v1beta2
+  kind: KafkaConnector
+  metadata:
+    name: postgresql-connector
+    labels:
+      strimzi.io/cluster: postgresql-connect
+  spec:
+    class: io.debezium.connector.postgresql.PostgresConnector
+    tasksMax: 1
+    config:
+      database.hostname: coffeeshopdb
+      database.port: 5432
+      database.user: postgres
+      database.password: postgres
+      database.dbname: coffeeshopdb
+      database.server.name: dbserver1
+      schema.include: coffeeshop
+      database.history.kafka.bootstrap.servers: my-cluster-kafka-bootstrap:9093
+      database.history.kafka.topic: schema-changes.coffeeshop
+      plugin.name: pgoutput
