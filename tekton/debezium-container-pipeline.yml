@@ -45,7 +45,7 @@ spec:
         - fetch-repository
       taskRef:
         kind: Task
-        name: s2i
+        name: build-from-redhat
       workspaces:
         - name: source
           workspace: shared-workspace
