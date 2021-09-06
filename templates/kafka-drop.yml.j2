@@ -1,0 +1,66 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: my-cluster-kafdrop
+  namespace: '{{ quarkuscoffeeshop_project }}'
+  labels:
+    app: kafdrop
+spec:
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ConfigChange
+  replicas: 1
+  revisionHistoryLimit: 10
+  test: false
+  selector:
+    name: kafdrop
+  template:
+    metadata:
+      name: kafdrop
+      creationTimestamp: null
+      labels:
+        name: kafdrop
+    spec:
+      containers:
+        - resources: {}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: kafdrop
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: KAFKA_BROKERCONNECT
+              value: 'my-cluster-kafka-bootstrap:9092'
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+          terminationMessagePolicy: File
+          image: obsidiandynamics/kafdrop
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler

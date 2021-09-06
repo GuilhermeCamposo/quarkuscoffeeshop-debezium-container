@@ -1,0 +1,91 @@
+- hosts: localhost
+  name: Install Quarkus Coffeeshop - Debezium
+  vars:
+    insecure_skip_tls_verify: true
+    quarkuscoffeeshop_project: quarkuscoffeeshop-demo-test
+    debezium_container_image: quay-quay-quay.router-default.apps.rad-two.rhpds.aws.uc2.io/quarkuscoffeeshop/quarkuscoffeeshop-debezium-container
+    postgresql_host: quarkuscoffeeshop.rhpds.aws.uc2.io
+    postgresql_user: postgres
+    postgresql_password: postgres
+  tasks:
+    - name: login as super user with token on OpenShift 4
+      command: "oc login --token={{ ocp_token }}  --server=https://api.{{ domain }}:6443 --insecure-skip-tls-verify={{ insecure_skip_tls_verify }}"
+      when:
+       - ocp_token is defined
+       - ocp_token is not none
+       - ocp_token|trim() != ""
+      ignore_errors: no
+
+    - name: Evaluate if {{ quarkuscoffeeshop_project }} namespace exists
+      k8s:
+        api_version: v1
+        kind: Namespace
+        name: '{{ quarkuscoffeeshop_project }}'
+        state: present
+
+    - name: Evaluate if Kafka instance exists
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'templates/kafka.yml.j2') | from_yaml }}"
+
+    - name: Waiting for Kafka instance to be ready
+      shell: |
+        set -o pipefail && oc get kafka -n {{ quarkuscoffeeshop_project }} | grep my-cluster
+      register: install_status
+      until: "'True' in install_status.stdout"
+      retries: 20
+      delay: 15
+      args:
+        executable: /bin/bash
+
+    - name: Import Kafka Connect image
+      shell: oc import-image quarkuscoffeeshop-debezium-container --from={{ debezium_container_image }} --confirm --insecure=true -n {{ quarkuscoffeeshop_project }}
+      retries: 5
+      delay: 15
+      args:
+        executable: /bin/bash
+
+    - name: Evaluate if Kafka Connect instance exists
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'templates/kafka-connect.yml.j2') | from_yaml }}"
+
+    - name: Waiting for Kafka Connect instance to be ready
+      shell: |
+        set -o pipefail && oc get kafkaconnect -n {{ quarkuscoffeeshop_project }} | grep postgresql-debezium
+      register: install_status
+      until: "'True' in install_status.stdout"
+      retries: 20
+      delay: 15
+      args:
+        executable: /bin/bash
+
+    - name: Evaluate if Kafka Connector instance exists
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'templates/kafka-connector.yml.j2') | from_yaml }}"
+
+    - name: Waiting for Kafka Connector instance to be ready
+      shell: |
+        set -o pipefail && oc get kafkaconnector -n {{ quarkuscoffeeshop_project }} | grep postgresql-debezium
+      register: install_status
+      until: "'True' in install_status.stdout"
+      retries: 20
+      delay: 15
+      args:
+        executable: /bin/bash
+
+    - name: Evaluate if Kafka Drop instance exists
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'templates/kafka-drop.yml.j2') | from_yaml }}"
+
+    - name: Evaluate if Kafka Drop Service instance exists
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'templates/kafka-drop-service.yml.j2') | from_yaml }}"
+
+    - name: Evaluate if Kafka Drop Route instance exists
+      k8s:
+        state: present
+        definition: "{{ lookup('template', 'templates/kafka-drop-route.yml.j2') | from_yaml }}"

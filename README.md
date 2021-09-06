@@ -1,12 +1,12 @@
 # debezium-container-postgresql
 
-# Requirements
+## Requirements
 
  You will need to have a service account to download de base image:
 
  https://access.redhat.com/terms-based-registry/#/accounts
 
-## Create resources
+## Install pipeline
 
     oc create -f tekton/source-pvc.yml
     oc create -f tekton/build-from-redhat.yml

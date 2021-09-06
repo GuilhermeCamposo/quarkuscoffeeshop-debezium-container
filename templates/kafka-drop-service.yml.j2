@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kafdrop
+  namespace: '{{ quarkuscoffeeshop_project}}'
+  labels:
+    app: kafdrop
+spec:
+  ports:
+    - name: 9000-tcp
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+  selector:
+    deploymentconfig: my-cluster-kafdrop

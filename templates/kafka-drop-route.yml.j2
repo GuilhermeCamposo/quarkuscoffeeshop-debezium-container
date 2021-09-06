@@ -1,0 +1,15 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: kafdrop
+  namespace: '{{ quarkuscoffeeshop_project }}'
+  labels:
+    app: kafdrop
+spec:
+  to:
+    kind: Service
+    name: kafdrop
+    weight: 100
+  port:
+    targetPort: 9000-tcp
+  wildcardPolicy: None

@@ -1,17 +1,18 @@
   apiVersion: kafka.strimzi.io/v1beta2
   kind: KafkaConnector
   metadata:
-    name: postgresql-connector
+    name: postgresql-debezium
+    namespace: '{{quarkuscoffeeshop_project}}'
     labels:
-      strimzi.io/cluster: postgresql-connect
+      strimzi.io/cluster: postgresql-debezium
   spec:
     class: io.debezium.connector.postgresql.PostgresConnector
     tasksMax: 1
     config:
-      database.hostname: coffeeshopdb
+      database.hostname: '{{ postgresql_host }}'
       database.port: 5432
-      database.user: postgres
-      database.password: postgres
+      database.user: '{{ postgresql_user }}'
+      database.password: '{{ postgresql_password }}'
       database.dbname: coffeeshopdb
       database.server.name: dbserver1
       schema.include: coffeeshop

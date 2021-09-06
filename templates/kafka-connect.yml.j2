@@ -1,8 +1,8 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnect
 metadata:
-  name: postgresql-connect
-  namespace: quarkuscoffeeshop-monolith-test
+  name: postgresql-debezium
+  namespace: '{{quarkuscoffeeshop_project}}'
   annotations:
     strimzi.io/use-connector-resources: "true"
 spec:
@@ -13,5 +13,5 @@ spec:
       - secretName: my-cluster-cluster-ca-cert
         certificate: ca.crt
   image: >-
-    image-registry.openshift-image-registry.svc:5000/quarkuscoffeeshop-monolith-test/quarkuscoffeeshop-debezium-container
+    image-registry.openshift-image-registry.svc:5000/{{quarkuscoffeeshop_project}}/quarkuscoffeeshop-debezium-container
   replicas: 1
