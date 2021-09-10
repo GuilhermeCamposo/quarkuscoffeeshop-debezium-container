@@ -2,7 +2,7 @@
   name: Install Quarkus Coffeeshop - Debezium
   vars:
     insecure_skip_tls_verify: true
-    quarkuscoffeeshop_project: quarkuscoffeeshop-demo-test
+    quarkuscoffeeshop_project: quarkuscoffeeshop-demo
     debezium_container_image: quay-quay-quay.router-default.apps.rad-two.rhpds.aws.uc2.io/quarkuscoffeeshop/quarkuscoffeeshop-debezium-container
     postgresql_host: quarkuscoffeeshop.rhpds.aws.uc2.io
     postgresql_user: postgres
