@@ -14,4 +14,6 @@
 
 ## How to run the play
 
+This playbook will only install Kafka and Kafka Connect. You need to install and run the pipeline first.
+
     ansible-playbook -e ocp_token= -e domain= install-demo.yml
